@@ -6,6 +6,7 @@ Predicts hand-drawn digits (0–9) using a Gradient Boosting Classifier model tr
 🧠 Model file: GradBoosting.pkl
 
 How to run:
+
 1. Place `GradBoosting.pkl` in the same folder as this file.
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run: `streamlit run app.py`
