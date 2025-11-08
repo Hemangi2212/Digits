@@ -94,7 +94,9 @@ with col2:
     clear_btn = st.button("🧹 Clear Canvas", use_container_width=True)
 
 if clear_btn:
-    st.experimental_rerun()
+    st.session_state.canvas = None
+    st.rerun()
+
 
 # ---------- PREDICTION ----------
 if predict_btn:
