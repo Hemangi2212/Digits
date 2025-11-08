@@ -1,88 +1,66 @@
 import streamlit as st
-from streamlit_drawable_canvas import st_canvas
-from PIL import Image
 import numpy as np
-import joblib
+import cv2
+import pickle
+from streamlit_drawable_canvas import st_canvas
 
-# ---------- PAGE CONFIG ----------
-st.set_page_config(page_title="Digit Classifier", page_icon="🔢", layout="centered")
+# ------------------- PAGE CONFIG -------------------
+st.set_page_config(
+    page_title="Digit Classifier",
+    page_icon="✏️",
+    layout="centered",
+    initial_sidebar_state="collapsed",
+)
 
-# ---------- STYLING ----------
+# ------------------- LOAD MODEL -------------------
+with open("GradBoosting.pkl", "rb") as f:
+    model = pickle.load(f)
+
+# ------------------- PAGE STYLE -------------------
 st.markdown("""
     <style>
         body {
             background-color: #0E1117;
+        }
+        .main {
+            background-color: #0E1117;
             color: white;
         }
-        .main-title {
+        h1, h2, h3 {
             text-align: center;
             color: #FFD700;
-            font-size: 40px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #BBBBBB;
-            font-size: 18px;
         }
         .result-box {
-            background-color: #1E1E1E;
-            border-radius: 12px;
-            padding: 25px;
             text-align: center;
-            box-shadow: 0px 0px 12px rgba(255,215,0,0.4);
             margin-top: 20px;
+            border-radius: 12px;
+            padding: 20px;
+            background: #1E1E1E;
+            box-shadow: 0 0 20px rgba(255,215,0,0.3);
+            animation: fadeIn 1s ease-in-out;
         }
-        .predict-btn {
-            background-color: #00C851 !important;
-            color: white !important;
-            font-weight: bold;
-            border-radius: 10px;
-            font-size: 18px;
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
         }
-        .clear-btn {
-            background-color: #FF4444 !important;
-            color: white !important;
-            font-weight: bold;
+        .stButton>button {
             border-radius: 10px;
-            font-size: 18px;
+            font-weight: bold;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# ---------- HEADER ----------
-st.markdown("<div class='main-title'>🔢 Digit Recognizer</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>Draw a digit (0–9) and let the AI guess with confidence!</div>", unsafe_allow_html=True)
-st.write("")
+st.markdown("<h1>✏️ Digit Recognizer — Gradient Boosting Model</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;'>Draw a digit (0–9) and let the AI guess with confidence!</p>", unsafe_allow_html=True)
 
-# ---------- LOAD MODEL ----------
-@st.cache_resource
-def load_model(path='GradBoosting.pkl'):
-    try:
-        return joblib.load(path)
-    except Exception as e:
-        st.error(f"Error loading model: {e}")
-        return None
-
-
-# ---------- IMAGE PREPROCESS ----------
-def preprocess_image(img: Image.Image) -> np.ndarray:
-    img = img.convert('L')          # grayscale
-    img = img.resize((8, 8))        # match sklearn digits
-    arr = np.asarray(img).astype(np.float32)
-    arr = (255 - arr) / 255 * 16    # invert + scale 0–16
-    return arr.flatten().reshape(1, -1)
-
-
-# ---------- CANVAS ----------
+# ------------------- CANVAS -------------------
 canvas_result = st_canvas(
-    fill_color="rgba(0,0,0,0)",
-    stroke_width=14,
-    stroke_color="#FFFFFF",
-    background_color="#000000",
-    height=300,
-    width=300,
+    fill_color="rgba(255, 255, 255, 1)",
+    stroke_width=15,
+    stroke_color="white",
+    background_color="black",
+    height=280,
+    width=280,
     drawing_mode="freedraw",
     key="canvas",
 )
@@ -93,42 +71,29 @@ with col1:
 with col2:
     clear_btn = st.button("🧹 Clear Canvas", use_container_width=True)
 
+# ------------------- CLEAR FUNCTION -------------------
 if clear_btn:
     st.session_state.canvas = None
     st.rerun()
 
+# ------------------- PREDICT FUNCTION -------------------
+if predict_btn and canvas_result.image_data is not None:
+    img = canvas_result.image_data.astype('uint8')
+    gray = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)
+    gray = cv2.bitwise_not(gray)
+    resized = cv2.resize(gray, (28, 28))
+    flat = resized.flatten().reshape(1, -1)
 
-# ---------- PREDICTION ----------
-if predict_btn:
-    if canvas_result.image_data is None:
-        st.warning("Please draw a digit first.")
-    else:
-        img_data = canvas_result.image_data.astype("uint8")
-        pil_img = Image.fromarray(img_data)
+    pred = model.predict(flat)[0]
+    prob = model.predict_proba(flat)[0]
+    confidence = np.max(prob) * 100
 
-        features = preprocess_image(pil_img)
-        model = load_model('GradBoosting.pkl')
-
-        if model:
-            try:
-                pred = model.predict(features)[0]
-
-                # Confidence (probability)
-                if hasattr(model, "predict_proba"):
-                    probs = model.predict_proba(features)[0]
-                    confidence = probs[int(pred)] * 100
-                else:
-                    confidence = 0
-
-                st.markdown(
-                    f"""
-                    <div class='result-box'>
-                        <h2 style='color:#00C851;'>Predicted Digit: {int(pred)}</h2>
-                        <h3 style='color:#FFD700;'>Confidence: {confidence:.2f}%</h3>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-            except Exception as e:
-                st.error(f"Prediction failed: {e}")
+    st.markdown(
+        f"""
+        <div class="result-box">
+            <h2 style='color:#00FF7F;'>Predicted Digit: {pred}</h2>
+            <h3 style='color:#FFD700;'>Confidence: {confidence:.2f}%</h3>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
