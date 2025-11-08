@@ -2,5 +2,7 @@ streamlit
 streamlit-drawable-canvas
 opencv-python-headless
 numpy
+
+
 pillow
 scikit-learn
