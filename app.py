@@ -61,8 +61,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Centering the drawing area
-col_space_left, col_canvas, col_space_right = st.columns([1, 2, 1])
+# Center layout: canvas (left), button (right)
+col_space_left, col_canvas, col_btn, col_space_right = st.columns([1, 2, 1, 1])
+
 with col_canvas:
     canvas_result = st_canvas(
         fill_color="rgba(0,0,0,0)",
@@ -73,17 +74,17 @@ with col_canvas:
         width=300,
         drawing_mode="freedraw",
         key="canvas",
-        display_toolbar=False,  # Hides undo, redo, delete buttons
+        display_toolbar=False,
     )
 
-# Centering buttons
-st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
-col1, col2 = st.columns([1, 1])
-with col1:
+with col_btn:
+    st.markdown("<br><br>", unsafe_allow_html=True)  # add vertical space
     predict = st.button("🔍 Predict", use_container_width=True)
 
-
+# Center the debug checkbox
+st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
 show_debug = st.checkbox("Show preprocessed 8×8 image (debug)", value=False)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # Prediction logic
 if predict:
@@ -94,8 +95,12 @@ if predict:
         pil = Image.fromarray(img_arr)
 
         features, viz_img = preprocess_for_digits(pil)
+        
+        # Center grayscale (debug) image
         if show_debug:
+            st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
             st.image(viz_img, width=120, caption="Preprocessed 8x8 view")
+            st.markdown("</div>", unsafe_allow_html=True)
 
         try:
             pred = model.predict(features)[0]
