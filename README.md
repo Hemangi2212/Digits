@@ -31,6 +31,7 @@ Draw a digit, click **Predict**, and see your model identify it in real-time!
 
 ```
 
+##
 Digit_Recognizer/
 │
 ├── app.py                 # Main Streamlit application
