@@ -1,4 +1,4 @@
-# app.py
+ # app.py
 import streamlit as st
 import numpy as np
 from PIL import Image, ImageOps
@@ -77,7 +77,7 @@ with col_canvas:
     )
 
 # Centering buttons
-st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
+st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True, layout='centered)
 col1, col2 = st.columns([1, 1])
 with col1:
     predict = st.button("🔍 Predict", use_container_width=True)
