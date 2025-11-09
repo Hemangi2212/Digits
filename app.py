@@ -130,6 +130,7 @@ with col_canvas:
         display_toolbar=False,  # Hides undo, redo, delete buttons
     )
 
+
 # Centering buttons
 st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
 col1, col2 = st.columns([1, 1])
