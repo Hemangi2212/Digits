@@ -101,15 +101,7 @@ canvas_result = st_canvas(
 col1, col2 = st.columns(2)
 with col1:
     predict = st.button("🔍 Predict", use_container_width=True)
-with col2:
-    clear = st.button("🧹 Clear Canvas", use_container_width=True)
 
-# Clear canvas: do not fully reload app, just reset session key used by canvas
-if clear:
-    # the canvas uses key 'canvas' internally; removing it then rerunning clears drawing
-    # For safety we set a sentinel in session_state and rerun
-    st.session_state.canvas = None
-    st.rerun()
 
 # Optional debug toggle
 show_debug = st.checkbox("Show preprocessed 8×8 image (debug)", value=True)
