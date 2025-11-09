@@ -52,6 +52,60 @@ def preprocess_for_digits(pil_img: Image.Image):
 
     return feat, viz_img
 
+ # app.py
+import streamlit as st
+import numpy as np
+from PIL import Image, ImageOps
+import joblib
+from streamlit_drawable_canvas import st_canvas
+
+st.set_page_config(page_title="Digit Recognizer", layout="centered")
+
+# ---------- Load model ----------
+@st.cache_resource
+def load_model(path="GradBoosting.pkl"):
+    return joblib.load(path)
+
+model = load_model()
+
+# ---------- Preprocessing helper ----------
+def preprocess_for_digits(pil_img: Image.Image):
+    img = pil_img.convert("L")
+    arr = np.asarray(img)
+
+    thresh = 50
+    fg_mask = (arr > thresh) & (arr < 255 - thresh)
+    if not fg_mask.any():
+        fg_mask = arr > (np.mean(arr) + 10)
+
+    coords = np.argwhere(fg_mask)
+    if coords.size == 0:
+        empty = np.zeros((8, 8), dtype=np.float32)
+        return empty.flatten().reshape(1, -1), Image.fromarray((empty / 16.0 * 255).astype(np.uint8))
+
+    y0, x0 = coords.min(axis=0)
+    y1, x1 = coords.max(axis=0) + 1
+    cropped = img.crop((x0, y0, x1, y1))
+
+    w, h = cropped.size
+    max_side = max(w, h)
+    pad_x = (max_side - w) // 2
+    pad_y = (max_side - h) // 2
+    padded = ImageOps.expand(cropped, border=(pad_x, pad_y, max_side - w - pad_x, max_side - h - pad_y), fill=0)
+
+    small = padded.resize((8, 8), Image.Resampling.LANCZOS)
+    small_arr = np.asarray(small).astype(np.float32)
+
+    if np.mean(small_arr) > 127:
+        small_arr = 255.0 - small_arr
+
+    scaled = (small_arr / 255.0) * 16.0
+    feat = scaled.flatten().reshape(1, -1).astype(np.float32)
+    viz = (scaled / 16.0 * 255).astype(np.uint8)
+    viz_img = Image.fromarray(viz).resize((120, 120), Image.Resampling.NEAREST)
+
+    return feat, viz_img
+
 # ---------- UI ----------
 st.markdown(
     """
@@ -61,9 +115,8 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Center layout: canvas (left), button (right)
-col_space_left, col_canvas, col_btn, col_space_right = st.columns([1, 2, 1, 1])
-
+# Centering the drawing area
+col_space_left, col_canvas, col_space_right = st.columns([1, 2, 1])
 with col_canvas:
     canvas_result = st_canvas(
         fill_color="rgba(0,0,0,0)",
@@ -74,17 +127,17 @@ with col_canvas:
         width=300,
         drawing_mode="freedraw",
         key="canvas",
-        display_toolbar=False,
+        display_toolbar=False,  # Hides undo, redo, delete buttons
     )
 
-with col_btn:
-    st.markdown("<br><br>", unsafe_allow_html=True)  # add vertical space
+# Centering buttons
+st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
+col1, col2 = st.columns([1, 1])
+with col1:
     predict = st.button("🔍 Predict", use_container_width=True)
 
-# Center the debug checkbox
-st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
+
 show_debug = st.checkbox("Show preprocessed 8×8 image (debug)", value=False)
-st.markdown("</div>", unsafe_allow_html=True)
 
 # Prediction logic
 if predict:
@@ -95,12 +148,8 @@ if predict:
         pil = Image.fromarray(img_arr)
 
         features, viz_img = preprocess_for_digits(pil)
-        
-        # Center grayscale (debug) image
         if show_debug:
-            st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
             st.image(viz_img, width=120, caption="Preprocessed 8x8 view")
-            st.markdown("</div>", unsafe_allow_html=True)
 
         try:
             pred = model.predict(features)[0]
