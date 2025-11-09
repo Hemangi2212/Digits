@@ -81,13 +81,7 @@ st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
 col1, col2 = st.columns([1, 1])
 with col1:
     predict = st.button("🔍 Predict", use_container_width=True)
-with col2:
-    clear = st.button("🧹 Clear Canvas", use_container_width=True)
-st.markdown("</div>", unsafe_allow_html=True)
 
-if clear:
-    st.session_state.canvas = None
-    st.rerun()
 
 show_debug = st.checkbox("Show preprocessed 8×8 image (debug)", value=False)
 
