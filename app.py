@@ -77,7 +77,7 @@ with col_canvas:
     )
 
 # Centering buttons
-st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True, layout='centered)
+st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
 col1, col2 = st.columns([1, 1])
 with col1:
     predict = st.button("🔍 Predict", use_container_width=True)
