@@ -38,7 +38,7 @@ Digit_Recognizer/
 ├── requirements.txt       # Dependencies
 └── README.md              # Project documentation
 
-````
+
 
 ---
 
@@ -76,14 +76,13 @@ Digit_Recognizer/
 * Model used: `GradientBoostingClassifier`
 * Input shape: `8×8` grayscale images (values scaled 0–16)
 
----
+
 
 ## 💡 Example Output
 
-```
 
 <img width="1179" height="689" alt="image" src="https://github.com/user-attachments/assets/63d87aa6-76e7-4865-a5d0-8b7eb7df2ca2" />
 <img width="1336" height="709" alt="image" src="https://github.com/user-attachments/assets/b390ee55-a0ba-4bd0-beed-d03ceb65a9e9" />
 
 
----
+
