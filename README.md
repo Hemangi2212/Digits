@@ -79,8 +79,10 @@ Digit_Recognizer/
 ## 💡 Example Output
 
 
-<img width="1179" height="689" alt="image" src="https://github.com/user-attachments/assets/63d87aa6-76e7-4865-a5d0-8b7eb7df2ca2" />
-<img width="1336" height="709" alt="image" src="https://github.com/user-attachments/assets/b390ee55-a0ba-4bd0-beed-d03ceb65a9e9" />
+## 🖼️ Preview
+
+![App Screenshot](https://github.com/user-attachments/assets/63d87aa6-76e7-4865-a5d0-8b7eb7df2ca2)
+![Prediction Screenshot](https://github.com/user-attachments/assets/b390ee55-a0ba-4bd0-beed-d03ceb65a9e9)
 
 
 
